@@ -9,8 +9,9 @@ Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 | Favicon RFP detection | **Strong** | Fixes a real bug for all LibreWolf/arkenfox users. 7 lines of JS, no effect on normal browsers, graceful degradation. [Proposed upstream.](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335) |
 | Nord theme favicons | **Weak** | Cosmetic preference — removes the favicon background and makes clipping circular. Looks better to me, but it's a style opinion, not a bug fix. |
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
+| YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream — depends on local DB paths, salt, and username. |
 
-The RFP detection patch is the strongest candidate for an upstream PR — it's a clear bug fix with no downside. The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference.
+The RFP detection patch is the strongest candidate for an upstream PR — it's a clear bug fix with no downside. The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
 
 ## Patches
 
@@ -26,8 +27,6 @@ This patch adds a pixel verification check before the favicon is replaced: it dr
 
 See: [FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091) ([proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335)), [arkenfox/user.js#1317](https://github.com/arkenfox/user.js/issues/1317)
 
----
-
 ### Nord theme: transparent circular favicons
 
 **Files:** `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css`
@@ -41,8 +40,6 @@ This patch removes the background and sets `border-radius: 50%` for circular fav
 
 In practice, favicons remain clearly visible without the background rectangle regardless of whether they are transparent or opaque.
 
----
-
 ### RSS-Bridge: YoutubeBridge cache TTL (3h → 6h)
 
 **File:** `bridges/YoutubeBridge.php`
@@ -50,6 +47,20 @@ In practice, favicons remain clearly visible without the background rectangle re
 YouTube rate-limits automated requests to its RSS feed endpoint (`/feeds/videos.xml`). When many feeds refresh simultaneously through RSS-Bridge, YouTube returns intermittent 404 errors. This is a [well-documented recurring issue](https://github.com/RSS-Bridge/rss-bridge/issues/2113) affecting any RSS-Bridge instance with multiple YouTube feeds.
 
 Increasing the cache TTL from 3 hours to 6 hours halves the request frequency. YouTube channels rarely post more than once a day, so 6 hours remains responsive enough for feed readers.
+
+### YouTube channel avatar favicons
+
+**Script:** `freshrss-yt-favicons.sh`
+
+FreshRSS uses generic RSS favicons for feeds coming through RSS-Bridge, since the bridge URL has no associated favicon. For YouTube feeds, this means every channel shows the same icon.
+
+This script queries the FreshRSS SQLite database for YouTube feeds (including those wrapped in FilterBridge), fetches each channel's avatar from the channel page, and saves it as a custom favicon using FreshRSS's salted hash naming convention.
+
+Designed to run monthly via systemd timer — channel avatars rarely change.
+
+```bash
+sudo ./freshrss-yt-favicons.sh
+```
 
 ## Usage
 
