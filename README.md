@@ -27,8 +27,6 @@ This patch adds a pixel verification check before the favicon is replaced: it dr
 
 See: [FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091) ([proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335)), [arkenfox/user.js#1317](https://github.com/arkenfox/user.js/issues/1317)
 
----
-
 ### Nord theme: transparent circular favicons
 
 **Files:** `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css`
@@ -42,8 +40,6 @@ This patch removes the background and sets `border-radius: 50%` for circular fav
 
 In practice, favicons remain clearly visible without the background rectangle regardless of whether they are transparent or opaque.
 
----
-
 ### RSS-Bridge: YoutubeBridge cache TTL (3h → 6h)
 
 **File:** `bridges/YoutubeBridge.php`
@@ -51,8 +47,6 @@ In practice, favicons remain clearly visible without the background rectangle re
 YouTube rate-limits automated requests to its RSS feed endpoint (`/feeds/videos.xml`). When many feeds refresh simultaneously through RSS-Bridge, YouTube returns intermittent 404 errors. This is a [well-documented recurring issue](https://github.com/RSS-Bridge/rss-bridge/issues/2113) affecting any RSS-Bridge instance with multiple YouTube feeds.
 
 Increasing the cache TTL from 3 hours to 6 hours halves the request frequency. YouTube channels rarely post more than once a day, so 6 hours remains responsive enough for feed readers.
-
----
 
 ### YouTube channel avatar favicons
 
