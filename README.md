@@ -6,7 +6,7 @@ Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 
 | Patch | PR candidate? | Summary |
 |---|---|---|
-| Favicon RFP detection | **Strong** | Fixes a real bug for all LibreWolf/arkenfox users. Upstream issue exists ([FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091)). 7 lines of JS, no effect on normal browsers, graceful degradation. |
+| Favicon RFP detection | **Strong** | Fixes a real bug for all LibreWolf/arkenfox users. 7 lines of JS, no effect on normal browsers, graceful degradation. [Proposed upstream.](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335) |
 | Nord theme favicons | **Moderate** | Visual improvement for all Nord users with transparent/circular favicons. No upstream issue filed yet. Somewhat opinionated — circular clipping vs rounded squares is a style choice. |
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 
@@ -24,7 +24,7 @@ This patch adds a pixel verification check before the favicon is replaced: it dr
 
 **Trade-off:** When RFP is active, the unread count badge on the favicon is disabled. The tab title still shows the unread count.
 
-See: [FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091), [arkenfox/user.js#1317](https://github.com/arkenfox/user.js/issues/1317)
+See: [FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091) ([proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335)), [arkenfox/user.js#1317](https://github.com/arkenfox/user.js/issues/1317)
 
 ---
 
