@@ -52,6 +52,8 @@ YouTube rate-limits automated requests to its RSS feed endpoint (`/feeds/videos.
 
 Increasing the cache TTL from 3 hours to 6 hours halves the request frequency. YouTube channels rarely post more than once a day, so 6 hours remains responsive enough for feed readers.
 
+---
+
 ### YouTube channel avatar favicons
 
 **Script:** `freshrss-yt-favicons.sh`
