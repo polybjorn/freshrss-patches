@@ -68,8 +68,6 @@ Designed to run monthly via systemd timer — channel avatars rarely change.
 sudo ./freshrss-yt-favicons.sh
 ```
 
----
-
 ## Usage
 
 ```bash
