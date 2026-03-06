@@ -1,6 +1,6 @@
 # freshrss-patches
 
-Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge) that fixes issues not yet addressed upstream. Run after each update — patches are only applied when needed.
+Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge) that applies fixes and tweaks not yet addressed upstream. Run after each update — patches are only applied when needed.
 
 ## Upstream viability
 
