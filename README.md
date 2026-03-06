@@ -24,10 +24,10 @@ The default Nord theme places a light background (`var(--text-accent)`, `#eceff4
 
 This patch removes the background and sets `border-radius: 50%` for circular favicons.
 
-**Trade-off:** Dark opaque favicons may be slightly less visible against the dark theme background without the contrasting rectangle. This patch is best suited for setups using custom transparent favicons.
-
 **Before:** Light rectangle behind each favicon
 **After:** No background, circular clipping
+
+In practice, favicons remain clearly visible without the background rectangle regardless of whether they are transparent or opaque.
 
 ### RSS-Bridge: YoutubeBridge cache TTL (3h → 6h)
 
