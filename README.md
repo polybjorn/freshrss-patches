@@ -4,6 +4,18 @@ Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 
 ## Patches
 
+### Favicon: RFP (Resist Fingerprinting) detection
+
+**File:** `p/scripts/main.js`
+
+FreshRSS dynamically generates its favicon via HTML5 canvas to overlay an unread article count. Browsers with Resist Fingerprinting enabled (LibreWolf, Firefox with arkenfox) corrupt the output of `canvas.toDataURL()`, producing a garbled striped image. FreshRSS doesn't detect this and replaces the good static favicon with corrupted data.
+
+This patch adds a pixel verification check before the favicon is replaced: it draws a known red pixel on a test canvas and reads it back. If the color doesn't match (indicating RFP is active), the function returns early and the static favicon is preserved.
+
+**Trade-off:** When RFP is active, the unread count badge on the favicon is disabled. The tab title still shows the unread count.
+
+See: [FreshRSS#4091](https://github.com/FreshRSS/FreshRSS/issues/4091), [arkenfox/user.js#1317](https://github.com/arkenfox/user.js/issues/1317)
+
 ### Nord theme: transparent circular favicons
 
 **Files:** `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css`
