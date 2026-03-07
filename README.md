@@ -11,7 +11,7 @@ Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream — depends on local DB paths, salt, and username. |
 
-The RFP detection patch was the strongest candidate and has been fixed upstream via [PR #8577](https://github.com/FreshRSS/FreshRSS/pull/8577) (SVG favicons instead of canvas). The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
+The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
 
 ## Patches
 
