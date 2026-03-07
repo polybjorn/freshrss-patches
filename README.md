@@ -17,7 +17,7 @@ The RFP detection patch was the strongest candidate and has been fixed upstream 
 
 ### ~~Favicon: RFP (Resist Fingerprinting) detection~~
 
-> **Resolved upstream.** FreshRSS [PR #8577](https://github.com/FreshRSS/FreshRSS/pull/8577) replaces the canvas-based favicon with SVG rendering, which avoids the RFP issue entirely. This patch is no longer needed as of FreshRSS 1.29.0.
+> **Resolved upstream.** FreshRSS [PR #8577](https://github.com/FreshRSS/FreshRSS/pull/8577) replaces the canvas-based favicon with SVG rendering, which avoids the RFP issue entirely. This patch should no longer be needed once the PR is released.
 
 <details>
 <summary>Original patch (obsolete)</summary>
