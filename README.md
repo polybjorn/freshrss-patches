@@ -6,7 +6,7 @@ Idempotent patch script for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 
 | Patch | PR candidate? | Summary |
 |---|---|---|
-| ~~Favicon RFP detection~~ | ~~**Strong**~~ | ~~Fixed upstream — FreshRSS now uses SVG favicons instead of canvas, avoiding the RFP issue entirely.~~ [Proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335), [fix in PR #8577](https://github.com/FreshRSS/FreshRSS/pull/8577). |
+| ~~Favicon RFP detection~~ | ~~**Strong**~~ | ~~Fixed upstream — FreshRSS now uses SVG favicons instead of canvas, avoiding the RFP issue entirely.~~ [Proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335), [merged in #8577](https://github.com/FreshRSS/FreshRSS/pull/8577). |
 | Nord theme favicons | **Weak** | Cosmetic preference — removes the favicon background and makes clipping circular. Looks better to me, but it's a style opinion, not a bug fix. |
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream — depends on local DB paths, salt, and username. |
@@ -17,7 +17,7 @@ The Nord patch could go either way depending on maintainer taste. The TTL change
 
 ### ~~Favicon: RFP (Resist Fingerprinting) detection~~
 
-> **Resolved upstream.** FreshRSS [PR #8577](https://github.com/FreshRSS/FreshRSS/pull/8577) replaces the canvas-based favicon with SVG rendering, which avoids the RFP issue entirely. This patch should no longer be needed once the PR is released.
+> **Resolved upstream.** FreshRSS [#8577](https://github.com/FreshRSS/FreshRSS/pull/8577) replaced the canvas-based favicon with SVG rendering, which avoids the RFP issue entirely. Merged 2026-03-08.
 
 <details>
 <summary>Original patch (obsolete)</summary>
