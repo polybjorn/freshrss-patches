@@ -4,3 +4,5 @@
 *.key
 *.p12
 *.kdbx
+CLAUDE.md
+.claude/
