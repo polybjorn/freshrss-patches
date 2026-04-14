@@ -39,6 +39,19 @@ if [ -f "$YT_BRIDGE" ] && grep -q 'CACHE_TIMEOUT = 60 \* 60 \* 3' "$YT_BRIDGE" 2
     applied+=("YoutubeBridge cache TTL")
 fi
 
+# --- nbUnreadsPerFeed: exclude hidden feeds from notification poll ---
+# Feeds with priority < PRIORITY_FEED (-5) are not rendered in the sidebar,
+# but the nbUnreadsPerFeed endpoint still returns their unread counts. This
+# causes refreshUnreads() to show the "new articles available" banner every
+# 2 minutes in an infinite loop, since the JS can never sync a non-existent
+# DOM element. This patch filters hidden feeds from the JSON response.
+# See: https://github.com/FreshRSS/FreshRSS/issues/8694
+NB_UNREADS="$FRESHRSS_DIR/app/views/javascript/nbUnreadsPerFeed.phtml"
+if [ -f "$NB_UNREADS" ] && ! grep -q 'PRIORITY_FEED' "$NB_UNREADS" 2>/dev/null; then
+    sed -i "s|\t\t\$result\['feeds'\]\[\$feed->id()\] = \$feed->nbNotRead();|\t\tif (\$feed->priority() >= FreshRSS_Feed::PRIORITY_FEED) {\n\t\t\t\$result['feeds'][\$feed->id()] = \$feed->nbNotRead();\n\t\t}|" "$NB_UNREADS"
+    applied+=("nbUnreadsPerFeed hidden feed filter")
+fi
+
 if [ ${#applied[@]} -gt 0 ]; then
     echo "Applied patches: ${applied[*]}"
 else

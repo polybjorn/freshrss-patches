@@ -10,6 +10,7 @@ Custom fixes and tweaks for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 | Nord theme favicons | **Weak** | Cosmetic preference. Removes the favicon background and makes clipping circular. Looks better to me, but it's a style opinion, not a bug fix. |
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream since it depends on local DB paths, salt, and username. |
+| nbUnreadsPerFeed hidden feed filter | **Strong** | Fixes a clear client/server mismatch -- the API returns feeds the sidebar doesn't render, causing an infinite notification loop. Small, safe change. Issue filed upstream. |
 
 The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
 
@@ -68,6 +69,18 @@ Designed to run monthly via systemd timer. Channel avatars rarely change.
 ```bash
 sudo ./freshrss-yt-favicons.sh
 ```
+
+### nbUnreadsPerFeed: exclude hidden feeds from notification poll
+
+**File:** `app/views/javascript/nbUnreadsPerFeed.phtml`
+
+FreshRSS polls `nbUnreadsPerFeed` every 2 minutes to check for new articles. The endpoint returns unread counts for all feeds, including hidden ones (priority < `PRIORITY_FEED`). But the sidebar doesn't render DOM elements for hidden feeds. The JS compares server counts against DOM state, and since hidden feeds have no DOM element, `feed_unreads` defaults to 0. When viewing "All articles", any hidden feed with unreads triggers the "There are new articles available" banner every poll cycle, indefinitely.
+
+This patch adds a priority filter to the endpoint so it only returns feeds that the sidebar actually renders.
+
+**Trade-off:** None in practice. Hidden feeds are excluded from the main view by design -- notifying about their unreads is a bug, not a feature.
+
+See: [FreshRSS#8694](https://github.com/FreshRSS/FreshRSS/issues/8694)
 
 ## Usage
 
