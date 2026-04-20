@@ -11,7 +11,7 @@ Custom fixes and tweaks for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream since it depends on local DB paths, salt, and username. |
 | nbUnreadsPerFeed hidden feed filter | **Strong** | Fixes a clear client/server mismatch -- the API returns feeds the sidebar doesn't render, causing an infinite notification loop. Small, safe change. Issue filed upstream. |
-| Nord nav_menu layout fixes | **Moderate** | Two unrelated layout bugs in the Nord theme's top-bar button row. The absolute-positioned sidebar toggle is upstream's choice (base theme) but breaks spacing at narrow widths. The mark-read dropdown edge is a Nord-specific side effect of hiding the text button at mobile widths. Both fixes are small and self-contained. |
+| Nord nav_menu layout fixes | **Moderate** | Two Nord-specific layout bugs in the top-bar button row: the sidebar toggle overlaps the first button at narrow widths, and the mark-read dropdown loses its left edge when the text button is hidden at `<=840px`. Both fixes are small and self-contained. [Issue filed upstream](https://github.com/FreshRSS/FreshRSS/issues/8707). |
 
 The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
 
@@ -83,6 +83,8 @@ Two isolated issues in the Nord theme's top-bar button row:
 
 **Before:** Toggle overlaps first button; dropdown toggle missing left edge at narrow widths
 **After:** Consistent spacing across widths; dropdown toggle renders as a proper standalone button
+
+See: [FreshRSS#8707](https://github.com/FreshRSS/FreshRSS/issues/8707)
 
 ### nbUnreadsPerFeed: exclude hidden feeds from notification poll
 
