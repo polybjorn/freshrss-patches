@@ -8,8 +8,9 @@ Custom fixes and tweaks for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 |---|---|---|
 | ~~Favicon RFP detection~~ | ~~**Strong**~~ | ~~Fixed upstream. FreshRSS now uses SVG favicons instead of canvas, avoiding the RFP issue entirely.~~ [Proposed upstream](https://github.com/FreshRSS/FreshRSS/issues/4091#issuecomment-4010452335), [merged in #8577](https://github.com/FreshRSS/FreshRSS/pull/8577). |
 | Nord theme favicons | **Weak** | Cosmetic preference. Removes the favicon background and makes clipping circular. Looks better to me, but it's a style opinion, not a bug fix. |
-| YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
+| YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. How useful this patch is depends on how often FreshRSS fetches: with staggered/batched fetching (see below) it's largely redundant, with stock behavior it helps. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream since it depends on local DB paths, salt, and username. |
+| Batched feed fetch | **Moderate** | Standalone utility, not a patch. Replaces FreshRSS's built-in refresh with a batched fetcher that retries errored feeds first, then fills remaining slots with the oldest. Run frequently (every 10 min) for a small number of feeds (15/run) instead of hitting every feed on a long interval. Reduces the risk of burst rate-limiting (relevant for RSS-Bridge + YouTube). Upstream viability depends on whether FreshRSS wants this as a built-in scheduling mode. |
 | nbUnreadsPerFeed hidden feed filter | **Strong** | Fixes a clear client/server mismatch -- the API returns feeds the sidebar doesn't render, causing an infinite notification loop. Small, safe change. Issue filed upstream. |
 | Nord nav_menu layout fixes | **Moderate** | Two Nord-specific layout bugs in the top-bar button row: the sidebar toggle overlaps the first button at narrow widths, and the mark-read dropdown loses its left edge when the text button is hidden at `<=840px`. Both fixes are small and self-contained. [Issue filed upstream](https://github.com/FreshRSS/FreshRSS/issues/8707). |
 
@@ -56,6 +57,30 @@ In practice, favicons remain clearly visible without the background rectangle re
 YouTube rate-limits automated requests to its RSS feed endpoint (`/feeds/videos.xml`). When many feeds refresh simultaneously through RSS-Bridge, YouTube returns intermittent 404 errors. This is a [well-documented recurring issue](https://github.com/RSS-Bridge/rss-bridge/issues/2113) affecting any RSS-Bridge instance with multiple YouTube feeds.
 
 Increasing the cache TTL from 3 hours to 6 hours halves the request frequency. YouTube channels rarely post more than once a day, so 6 hours remains responsive enough for feed readers.
+
+### Batched feed fetch
+
+**Scripts:** `freshrss-fetch.php`, `freshrss-fetch.sh`
+**Systemd:** `systemd/freshrss-fetch.service`, `systemd/freshrss-fetch.timer`
+
+FreshRSS's default refresh runs every feed on the same interval and in parallel. For instances with many feeds (especially YouTube feeds via RSS-Bridge), this produces refresh bursts that invite rate-limiting. This script fetches a small batch of feeds each tick instead:
+
+1. Retry all errored (non-muted) feeds first, up to the batch size.
+2. Fill remaining slots with the oldest feeds (FreshRSS's default ordering).
+
+Paired with a 10-minute timer and a batch size of 15, roughly 90 feeds cycle per hour with naturally staggered requests. Errored feeds get retried on the next tick instead of waiting for the full cycle.
+
+```bash
+# Manual run (as root; the wrapper invokes php as www-data)
+sudo ./freshrss-fetch.sh 15
+
+# Env overrides if your install lives elsewhere
+sudo FRESHRSS_DIR=/path/to/FreshRSS FRESHRSS_USER=myuser ./freshrss-fetch.sh
+```
+
+Install the systemd units by copying `systemd/freshrss-fetch.*` to `/etc/systemd/system/`, placing `freshrss-fetch.sh` somewhere on `PATH` (or editing the unit's `ExecStart`), then `systemctl enable --now freshrss-fetch.timer`. Disable FreshRSS's own refresh cron if you use this.
+
+The `FRESHRSS_USER` defaults to `freshrss`; change it if your FreshRSS username differs.
 
 ### YouTube channel avatar favicons
 
