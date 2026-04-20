@@ -11,6 +11,7 @@ Custom fixes and tweaks for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and
 | YoutubeBridge cache TTL | **Weak** | Mitigates a well-documented rate-limiting issue ([RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113)), but the "right" default is debatable. 6 hours works for casual readers; users who want faster updates would disagree. Better suited as a user-configurable default than a hardcoded change. |
 | YouTube channel avatars | **None** | Standalone utility script, not a patch. Fetches YouTube channel avatars and sets them as custom FreshRSS favicons for RSS-Bridge feeds. Too deployment-specific for upstream since it depends on local DB paths, salt, and username. |
 | nbUnreadsPerFeed hidden feed filter | **Strong** | Fixes a clear client/server mismatch -- the API returns feeds the sidebar doesn't render, causing an infinite notification loop. Small, safe change. Issue filed upstream. |
+| Nord nav_menu layout fixes | **Moderate** | Two unrelated layout bugs in the Nord theme's top-bar button row. The absolute-positioned sidebar toggle is upstream's choice (base theme) but breaks spacing at narrow widths. The mark-read dropdown edge is a Nord-specific side effect of hiding the text button at mobile widths. Both fixes are small and self-contained. |
 
 The Nord patch could go either way depending on maintainer taste. The TTL change is more of a personal tuning preference. The avatar script is a companion utility, not an upstream candidate.
 
@@ -69,6 +70,19 @@ Designed to run monthly via systemd timer. Channel avatars rarely change.
 ```bash
 sudo ./freshrss-yt-favicons.sh
 ```
+
+### Nord theme: nav_menu layout fixes
+
+**File:** `p/themes/Nord/nord.css`
+
+Two isolated issues in the Nord theme's top-bar button row:
+
+**1. Sidebar toggle spacing.** Upstream (`base-theme/frss.css`) positions `#nav_menu_toggle_aside` absolutely at `left: 0.5rem` and reserves space via `padding-left` on `.nav_menu`. Nord overrides `.nav_menu`'s padding to `5px 0`, removing that reserved space. The result: at any viewport width where the button row wraps or the reserved padding would have mattered, the absolute toggle visually collides with the first button group. The fix reverts the toggle to `position: static` so it flows inline with the rest of the centered row and participates in normal spacing.
+
+**2. Mark-read dropdown left edge.** Upstream hides the `.read_all.btn` ("Mark as read" text) at `max-width: 840px`, leaving only the dropdown toggle with a `✓` glyph. Nord's `.stick` styling strips the dropdown toggle's left border and radius because it normally sits flush against the text button. Once the text button is hidden, the toggle has a cut-off left edge. The fix restores a normal left border and radius inside the same media query.
+
+**Before:** Toggle overlaps first button; dropdown toggle missing left edge at narrow widths
+**After:** Consistent spacing across widths; dropdown toggle renders as a proper standalone button
 
 ### nbUnreadsPerFeed: exclude hidden feeds from notification poll
 

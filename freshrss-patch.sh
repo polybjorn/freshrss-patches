@@ -28,6 +28,33 @@ for css in "$NORD_CSS" "$NORD_RTL"; do
     fi
 done
 
+# --- Nord theme: fix nav_menu layout quirks ---
+# Two upstream issues only visible in Nord:
+#   1. #nav_menu_toggle_aside is absolute-positioned (frss.css). When the
+#      button row wraps at narrow widths, the absolute toggle no longer
+#      participates in centering/spacing, visually colliding with the first
+#      button group. Making it position: static lets it flow inline.
+#   2. At <=840px, upstream hides the "Mark as read" text button and keeps
+#      only the dropdown toggle. Nord strips that toggle's left border and
+#      radius (so it visually joined the text button), leaving a cut-off
+#      edge once the text button is gone. Restore a normal left edge.
+if [ -f "$NORD_CSS" ] && ! grep -q 'freshrss-patches: nav_menu fixes' "$NORD_CSS" 2>/dev/null; then
+    cat >> "$NORD_CSS" <<'EOF'
+/* freshrss-patches: nav_menu fixes */
+.nav_menu #nav_menu_toggle_aside {
+	position: static;
+}
+@media (max-width: 840px) {
+	.nav_menu .stick #mark-read-menu .dropdown-toggle.btn {
+		border-left: 1px solid var(--border-elements);
+		border-top-left-radius: 6px;
+		border-bottom-left-radius: 6px;
+	}
+}
+EOF
+    applied+=("Nord nav_menu layout fixes")
+fi
+
 # --- RSS-Bridge: increase YoutubeBridge cache TTL to 6 hours ---
 # The default 3-hour cache means RSS-Bridge hits YouTube frequently. With many
 # feeds refreshing simultaneously, YouTube rate-limits and returns 404 errors.
