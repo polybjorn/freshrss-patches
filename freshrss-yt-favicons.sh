@@ -1,28 +1,32 @@
 #!/bin/bash
-# Download YouTube channel avatars as FreshRSS custom favicons
-# Runs monthly to catch avatar changes
+# Download YouTube channel avatars as FreshRSS custom favicons.
+# Suitable for monthly cadence: channel avatars rarely change.
 set -euo pipefail
 
-SALT=$(grep -oP "'salt'\s*=>\s*'\K[^']+" /var/www/FreshRSS/data/config.php)
-USERNAME="freshrss"
-DB="/var/www/FreshRSS/data/users/freshrss/db.sqlite"
-FAVICONS_DIR="/var/www/FreshRSS/data/favicons"
+FRESHRSS_DIR="${FRESHRSS_DIR:-/var/www/FreshRSS}"
+FRESHRSS_USER="${FRESHRSS_USER:-freshrss}"
 
-ok=0
-fail=0
+CONFIG="$FRESHRSS_DIR/data/config.php"
+DB="$FRESHRSS_DIR/data/users/$FRESHRSS_USER/db.sqlite"
+FAVICONS_DIR="$FRESHRSS_DIR/data/favicons"
+
+if [ ! -f "$CONFIG" ] || [ ! -f "$DB" ]; then
+    echo "FreshRSS not found at $FRESHRSS_DIR (user: $FRESHRSS_USER)" >&2
+    exit 1
+fi
+
+SALT=$(grep -oP "'salt'\s*=>\s*'\K[^']+" "$CONFIG")
 
 sqlite3 "$DB" "SELECT id, website FROM feed WHERE url LIKE '%YoutubeBridge%' OR (url LIKE '%FilterBridge%' AND url LIKE '%YoutubeBridge%');" | while IFS='|' read -r feed_id website; do
-    hash=$(php -r "echo hash('crc32b', '${SALT}${feed_id}${USERNAME}');")
-    ico_path="${FAVICONS_DIR}/${hash}.ico"
+    [ -z "$website" ] && continue
 
-    if [ -z "$website" ]; then
-        continue
-    fi
+    hash=$(php -r "echo hash('crc32b', '${SALT}${feed_id}${FRESHRSS_USER}');")
+    ico_path="${FAVICONS_DIR}/${hash}.ico"
 
     avatar_url=$(curl -sL --max-time 10 "$website" 2>/dev/null | grep -oP '"avatar":\{"thumbnails":\[\{"url":"\K[^"]+' | head -1) || true
 
     if [ -z "$avatar_url" ]; then
-        echo "FAIL $feed_id — no avatar found"
+        echo "FAIL $feed_id - no avatar found"
         continue
     fi
 

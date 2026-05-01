@@ -57,12 +57,18 @@ To install as a timer: copy `systemd/freshrss-fetch.*` to `/etc/systemd/system/`
 ### YouTube channel avatar favicons
 
 **Script:** `freshrss-yt-favicons.sh`
+**Systemd:** `systemd/freshrss-yt-favicons.service`, `systemd/freshrss-yt-favicons.timer`
 
-FreshRSS uses a generic RSS favicon for feeds coming through RSS-Bridge. For YouTube feeds, every channel ends up with the same icon. This script queries the FreshRSS SQLite database for YouTube feeds (including those wrapped in FilterBridge), fetches each channel's avatar, and saves it as a custom favicon using FreshRSS's salted hash naming convention. Designed to run monthly via systemd timer.
+FreshRSS uses a generic RSS favicon for feeds coming through RSS-Bridge. For YouTube feeds, every channel ends up with the same icon. This script queries the FreshRSS SQLite database for YouTube feeds (including those wrapped in FilterBridge), fetches each channel's avatar, and saves it as a custom favicon using FreshRSS's salted hash naming convention.
 
 ```bash
 sudo ./freshrss-yt-favicons.sh
+
+# Env overrides if your install lives elsewhere
+sudo FRESHRSS_DIR=/path/to/FreshRSS FRESHRSS_USER=myuser ./freshrss-yt-favicons.sh
 ```
+
+The shipped timer runs monthly (1st of month, 04:00). Channel avatars rarely change.
 
 ## Applying patches
 
