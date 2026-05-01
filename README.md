@@ -49,8 +49,10 @@ Paired with a 10-minute timer and a batch size of 15, roughly 90 feeds cycle per
 sudo ./freshrss-fetch.sh 15
 
 # Env overrides if your install lives elsewhere
-sudo FRESHRSS_DIR=/path/to/FreshRSS FRESHRSS_USER=myuser ./freshrss-fetch.sh
+sudo FRESHRSS_DIR=/path/to/FreshRSS ./freshrss-fetch.sh
 ```
+
+`FRESHRSS_USER` is auto-detected from `data/users/`; set it explicitly only for multi-user installs.
 
 To install as a timer: copy `systemd/freshrss-fetch.*` to `/etc/systemd/system/`, put `freshrss-fetch.sh` on `PATH` (or edit the unit's `ExecStart`), then `systemctl enable --now freshrss-fetch.timer`. Disable FreshRSS's own refresh cron if you use this.
 
@@ -65,10 +67,10 @@ FreshRSS uses a generic RSS favicon for feeds coming through RSS-Bridge. For You
 sudo ./freshrss-yt-favicons.sh
 
 # Env overrides if your install lives elsewhere
-sudo FRESHRSS_DIR=/path/to/FreshRSS FRESHRSS_USER=myuser ./freshrss-yt-favicons.sh
+sudo FRESHRSS_DIR=/path/to/FreshRSS ./freshrss-yt-favicons.sh
 ```
 
-The shipped timer runs monthly (1st of month, 04:00). Channel avatars rarely change.
+`FRESHRSS_USER` is auto-detected from `data/users/`; set it explicitly only for multi-user installs. The shipped timer runs monthly (1st of month, 04:00); channel avatars rarely change.
 
 ## Applying patches
 
