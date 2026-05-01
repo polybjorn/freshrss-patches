@@ -2,14 +2,14 @@
 
 Custom fixes, tweaks, and utilities for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge) not yet addressed upstream. Patches are idempotent and safe to run after each update.
 
-**Contents:**
+| Type | Item | Files |
+|---|---|---|
+| Patch | Nord theme: transparent circular favicons | `nord.css`, `nord.rtl.css` |
+| Patch | YoutubeBridge cache TTL (3h -> 6h) | `YoutubeBridge.php` |
+| Utility | Batched feed fetch | `freshrss-fetch.{sh,php}` + systemd units |
+| Utility | YouTube channel avatar favicons | `freshrss-yt-favicons.sh` + systemd units |
 
-- **Patches** (reapplied via `freshrss-patch.sh`):
-  - Nord theme: transparent circular favicons
-  - RSS-Bridge YoutubeBridge cache TTL (3h -> 6h)
-- **Utilities** (standalone scripts):
-  - Batched feed fetch
-  - YouTube channel avatar favicons
+Patches are reapplied via `freshrss-patch.sh` after upstream updates. Utilities are standalone scripts.
 
 ## Patches
 
@@ -30,7 +30,7 @@ YouTube rate-limits automated requests to `/feeds/videos.xml`, producing intermi
 
 ## Utilities
 
-Standalone scripts, not invoked by `freshrss-patch.sh`. Run manually or wire them into your own systemd units.
+Standalone scripts, not invoked by `freshrss-patch.sh`. Run manually or use the systemd units shipped in `systemd/`.
 
 ### Batched feed fetch
 
@@ -88,4 +88,4 @@ To add a new patch: define an `apply_*` function in `freshrss-patch.sh`, call it
 
 ## Last verified
 
-2026-04-20 against FreshRSS 1.28.2-dev, RSS-Bridge 2026-02-21, PHP 8.5, Debian 12 (Bookworm).
+2026-05-01 against FreshRSS 1.28.2-dev, RSS-Bridge 2026-02-21, PHP 8.5.5, Debian 12 (Bookworm).
