@@ -2,6 +2,15 @@
 
 Custom fixes, tweaks, and utilities for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge) not yet addressed upstream. Patches are idempotent and safe to run after each update.
 
+**Contents:**
+
+- **Patches** (reapplied via `freshrss-patch.sh`):
+  - Nord theme: transparent circular favicons
+  - RSS-Bridge YoutubeBridge cache TTL (3h -> 6h)
+- **Utilities** (standalone scripts):
+  - Batched feed fetch
+  - YouTube channel avatar favicons
+
 ## Patches
 
 ### Nord theme: transparent circular favicons
