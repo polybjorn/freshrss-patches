@@ -1,0 +1,19 @@
+Nord theme (RTL): transparent circular favicons.
+
+Identical change to freshrss-nord-favicons-ltr.patch, applied to the
+right-to-left stylesheet. Split into a separate file so each stylesheet
+can be applied, skipped, or detected as already-applied independently.
+
+--- a/p/themes/Nord/nord.rtl.css
++++ b/p/themes/Nord/nord.rtl.css
+@@ -471,8 +471,8 @@
+ }
+
+ img.favicon {
+-	background: var(--text-accent);
+-	border-radius: 4px;
++	background: none;
++	border-radius: 50%;
+ }
+
+ /*=== Pagination */

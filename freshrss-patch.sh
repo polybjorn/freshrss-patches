@@ -1,59 +1,68 @@
 #!/bin/bash
 # Re-apply FreshRSS and RSS-Bridge patches that get overwritten on update.
 # Safe to run repeatedly (idempotent). Run after each FreshRSS or RSS-Bridge update.
+#
+# Each *.patch file in patches/ is a unified diff applied with `patch -p1`.
+# Filename prefix selects the target tree:
+#   freshrss-*.patch   -> $FRESHRSS_DIR   (default /var/www/FreshRSS)
+#   rss-bridge-*.patch -> $RSSBRIDGE_DIR  (default /var/www/rss-bridge)
 set -euo pipefail
+shopt -s nullglob
 
 FRESHRSS_DIR="${FRESHRSS_DIR:-/var/www/FreshRSS}"
 RSSBRIDGE_DIR="${RSSBRIDGE_DIR:-/var/www/rss-bridge}"
 
-NORD_CSS="$FRESHRSS_DIR/p/themes/Nord/nord.css"
-NORD_RTL="$FRESHRSS_DIR/p/themes/Nord/nord.rtl.css"
-YT_BRIDGE="$RSSBRIDGE_DIR/bridges/YoutubeBridge.php"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATCH_DIR="$SCRIPT_DIR/patches"
 
 applied=()
+skipped=()
+failed=()
 
-# Each apply_* function detects whether the patch is needed and applies it,
-# appending a label to `applied` on success. Functions are no-ops when the
-# target file is missing or the patch is already in place.
+apply_one() {
+  local patchfile="$1"
+  local name target
+  name="$(basename "$patchfile" .patch)"
 
-# Nord theme: remove favicon background, make circular.
-# The default Nord theme sets a light background behind feed favicons and
-# uses slightly rounded corners. Looks bad with transparent/circular favicons
-# (e.g. YouTube channel avatars). Trade-off: dark opaque favicons may be less
-# visible without the background.
-apply_nord_favicons() {
-  for css in "$NORD_CSS" "$NORD_RTL"; do
-    [ -f "$css" ] || continue
-    grep -q 'img\.favicon' "$css" 2>/dev/null || continue
-    grep -A1 'img\.favicon' "$css" | grep -q 'background: var(--text-accent)' || continue
-    sed -i '/img\.favicon/,/^}/{s/background: var(--text-accent);/background: none;/;s/border-radius: 4px;/border-radius: 50%;/}' "$css"
-    applied+=("$(basename "$css") favicon style")
-  done
+  case "$name" in
+    freshrss-*)   target="$FRESHRSS_DIR" ;;
+    rss-bridge-*) target="$RSSBRIDGE_DIR" ;;
+    *)
+      echo "Skip $name: filename must start with 'freshrss-' or 'rss-bridge-'" >&2
+      return 0
+      ;;
+  esac
+
+  if [ ! -d "$target" ]; then
+    skipped+=("$name (target $target missing)")
+    return 0
+  fi
+
+  if patch -p1 -d "$target" --forward --dry-run --silent <"$patchfile" >/dev/null 2>&1; then
+    patch -p1 -d "$target" --forward --silent <"$patchfile" >/dev/null
+    applied+=("$name")
+  elif patch -p1 -d "$target" --reverse --dry-run --silent <"$patchfile" >/dev/null 2>&1; then
+    skipped+=("$name (already applied)")
+  else
+    failed+=("$name")
+    echo "Patch failed: $name (target diverged from upstream)" >&2
+  fi
 }
 
-# RSS-Bridge: increase YoutubeBridge cache TTL from 3h to 6h.
-# The default 3-hour cache means RSS-Bridge hits YouTube frequently. With
-# many feeds refreshing simultaneously, YouTube rate-limits and returns 404
-# errors. 6 hours halves request frequency while remaining responsive enough
-# (channels rarely post more than once a day).
-# See: https://github.com/RSS-Bridge/rss-bridge/issues/2113
-apply_yt_cache_ttl() {
-  [ -f "$YT_BRIDGE" ] || return 0
-  grep -q 'CACHE_TIMEOUT = 60 \* 60 \* 3' "$YT_BRIDGE" 2>/dev/null || return 0
-  sed -i "s/CACHE_TIMEOUT = 60 \* 60 \* 3;.*/CACHE_TIMEOUT = 60 * 60 * 6; \/\/ 6 hours/" "$YT_BRIDGE"
-  applied+=("YoutubeBridge cache TTL")
-}
+patches=("$PATCH_DIR"/*.patch)
+if [ ${#patches[@]} -eq 0 ]; then
+  echo "No patches found in $PATCH_DIR" >&2
+  exit 0
+fi
 
-# To add a patch: define apply_<name>, call it from main, document in README.
-main() {
-  apply_nord_favicons
-  apply_yt_cache_ttl
-}
+for p in "${patches[@]}"; do
+  apply_one "$p"
+done
 
-main
+[ ${#applied[@]} -gt 0 ] && echo "Applied patches: ${applied[*]}"
+[ ${#skipped[@]} -gt 0 ] && echo "Skipped: ${skipped[*]}"
+[ ${#failed[@]} -gt 0 ] && { echo "Failed: ${failed[*]}" >&2; exit 1; }
 
-if [ ${#applied[@]} -gt 0 ]; then
-  echo "Applied patches: ${applied[*]}"
-else
-  echo "No patches needed (already applied or targets not found)"
+if [ ${#applied[@]} -eq 0 ] && [ ${#skipped[@]} -eq 0 ]; then
+  echo "No patches applicable."
 fi

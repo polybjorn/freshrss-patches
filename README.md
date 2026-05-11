@@ -2,29 +2,37 @@
 
 Custom fixes, tweaks, and utilities for [FreshRSS](https://github.com/FreshRSS/FreshRSS) and [RSS-Bridge](https://github.com/RSS-Bridge/rss-bridge) not yet addressed upstream. Patches are idempotent and safe to run after each update.
 
-| Type | Item | Files |
+| Type | Item | Target |
 |---|---|---|
-| Patch | Nord theme: transparent circular favicons | `nord.css`, `nord.rtl.css` |
-| Patch | YoutubeBridge cache TTL (3h -> 6h) | `YoutubeBridge.php` |
+| Patch | Nord theme: transparent circular favicons (LTR + RTL) | `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css` (FreshRSS) |
+| Patch | YoutubeBridge cache TTL (3h -> 6h) | `bridges/YoutubeBridge.php` (RSS-Bridge) |
 | Utility | Batched feed fetch | `freshrss-fetch.{sh,php}` + systemd units |
 | Utility | YouTube channel avatar favicons | `freshrss-yt-favicons.sh` + systemd units |
 
-Patches are reapplied via `freshrss-patch.sh` after upstream updates. Utilities are standalone scripts.
+Patches are unified diffs in `patches/`, applied in place against the upstream tree by `freshrss-patch.sh` after each FreshRSS or RSS-Bridge update. The script is idempotent: already-applied patches are detected and skipped. Utilities are standalone scripts shipped in this repo.
+
+To apply a single patch manually (without the script):
+
+```sh
+cd /var/www/rss-bridge          # or /var/www/FreshRSS
+patch -p1 < /path/to/patches/<name>.patch
+```
+
+Filename prefix selects the target tree: `freshrss-*.patch` -> `$FRESHRSS_DIR` (default `/var/www/FreshRSS`), `rss-bridge-*.patch` -> `$RSSBRIDGE_DIR` (default `/var/www/rss-bridge`).
 
 ## Patches
 
 ### Nord theme: transparent circular favicons
 
-**Files:** `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css`
+**Patches:** [`patches/freshrss-nord-favicons-ltr.patch`](patches/freshrss-nord-favicons-ltr.patch), [`patches/freshrss-nord-favicons-rtl.patch`](patches/freshrss-nord-favicons-rtl.patch)
+**Targets:** `p/themes/Nord/nord.css`, `p/themes/Nord/nord.rtl.css`
 
-The default Nord theme places a light background (`var(--text-accent)`) behind feed favicons with `border-radius: 4px`. This creates a visible light rectangle behind transparent or circular favicons, particularly noticeable with custom YouTube channel avatars. The patch removes the background and sets `border-radius: 50%`.
-
-**Before:** Light rectangle behind each favicon
-**After:** No background, circular clipping
+The default Nord theme places a light background (`var(--text-accent)`) behind feed favicons with `border-radius: 4px`. This creates a visible light rectangle behind transparent or circular favicons, particularly noticeable with custom YouTube channel avatars. The patch removes the background and sets `border-radius: 50%`. Split into LTR and RTL files so each stylesheet can be applied or detected as already-applied independently.
 
 ### RSS-Bridge: YoutubeBridge cache TTL (3h -> 6h)
 
-**File:** `bridges/YoutubeBridge.php`
+**Patch:** [`patches/rss-bridge-youtubebridge-cache-ttl.patch`](patches/rss-bridge-youtubebridge-cache-ttl.patch)
+**Target:** `bridges/YoutubeBridge.php`
 
 YouTube rate-limits automated requests to `/feeds/videos.xml`, producing intermittent 404s when many feeds refresh simultaneously. See [RSS-Bridge#2113](https://github.com/RSS-Bridge/rss-bridge/issues/2113). Raising the cache TTL from 3 hours to 6 hours halves request frequency while remaining responsive (YouTube channels rarely post more than once a day).
 

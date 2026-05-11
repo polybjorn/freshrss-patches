@@ -1,0 +1,20 @@
+Increase YoutubeBridge cache TTL from 3h to 6h.
+
+YouTube rate-limits automated requests to /feeds/videos.xml, producing
+intermittent 404s when many feeds refresh simultaneously. Raising the
+cache TTL halves request frequency while remaining responsive (channels
+rarely post more than once a day).
+
+Reference: https://github.com/RSS-Bridge/rss-bridge/issues/2113
+
+--- a/bridges/YoutubeBridge.php
++++ b/bridges/YoutubeBridge.php
+@@ -4,7 +4,7 @@
+ {
+     const NAME = 'YouTube';
+     const URI = 'https://www.youtube.com';
+-    const CACHE_TIMEOUT = 60 * 60 * 3;
++    const CACHE_TIMEOUT = 60 * 60 * 6; // 6 hours
+     const DESCRIPTION = 'Returns the 10 newest videos by username/channel/playlist or search';
+
+     const PARAMETERS = [

@@ -1,0 +1,25 @@
+Nord theme (LTR): transparent circular favicons.
+
+The default Nord theme places a light background (var(--text-accent))
+behind feed favicons with border-radius: 4px. This creates a visible
+light rectangle behind transparent or circular favicons, particularly
+noticeable with YouTube channel avatars. This patch removes the
+background and makes the clipping circular.
+
+Companion: freshrss-nord-favicons-rtl.patch applies the identical
+change to nord.rtl.css. They're split so each file can be applied,
+skipped, or detected as already-applied independently.
+
+--- a/p/themes/Nord/nord.css
++++ b/p/themes/Nord/nord.css
+@@ -471,8 +471,8 @@
+ }
+
+ img.favicon {
+-	background: var(--text-accent);
+-	border-radius: 4px;
++	background: none;
++	border-radius: 50%;
+ }
+
+ /*=== Pagination */
